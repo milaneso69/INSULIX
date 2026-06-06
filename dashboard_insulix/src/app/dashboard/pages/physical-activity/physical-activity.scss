@@ -1,0 +1,201 @@
+// Estilos sincronizados con Diet Module
+$insulix-blue: #10b981; // Verde para actividad, pero con la misma intensidad
+$insulix-blue-hover: #059669;
+$insulix-blue-light: #ecfdf5;
+$bg-light: #f4f7fb;
+$text-dark: #1e293b;
+$text-medium: #475569;
+$text-muted: #64748b;
+$card-border: #e2e8f0;
+
+.activity-container {
+  padding: 32px;
+  background-color: $bg-light;
+  min-height: 100vh;
+  font-family: 'Inter', Roboto, 'Helvetica Neue', sans-serif; // Sincronizado
+  color: $text-dark;
+}
+
+// Page Header
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+
+  .header-content {
+    h1 { 
+      margin: 0 0 8px 0;
+      font-size: 28px; 
+      font-weight: 700; 
+      color: #1e293b; 
+      letter-spacing: -0.5px;
+    }
+    p { color: $text-medium; font-size: 16px; margin: 0; }
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .view-toggle {
+      display: flex;
+      background: white;
+      padding: 4px;
+      border-radius: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+
+      button {
+        height: 40px;
+        border-radius: 20px;
+        padding: 0 16px;
+        font-weight: 600;
+        color: $text-medium;
+        transition: all 0.2s;
+
+        mat-icon { margin-right: 4px; font-size: 20px; width: 20px; height: 20px; }
+
+        &.active-tab {
+          background: $insulix-blue-light;
+          color: $insulix-blue;
+        }
+      }
+    }
+
+    .rounded-btn {
+      height: 48px; border-radius: 24px; font-weight: 600; padding: 0 24px;
+      mat-icon { margin-right: 6px; }
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+    }
+  }
+}
+
+// Modal Styles (Sincronizados totalmente con diet.scss)
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal-card {
+  background: white;
+  width: 100%;
+  max-width: 550px;
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  h3 { margin-top: 0; margin-bottom: 24px; font-size: 22px; font-weight: 700; color: $text-dark; }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .full-width { width: 100%; margin-bottom: 12px; }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+
+    button { padding: 0 24px; height: 44px; border-radius: 22px; font-weight: 600; }
+  }
+}
+
+// Table Styles
+.table-container {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  margin-bottom: 32px;
+}
+
+.activity-table {
+  width: 100%;
+
+  th.mat-mdc-header-cell {
+    background: #f8fafc;
+    font-size: 12px;
+    font-weight: 700;
+    color: $text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #e2e8f0;
+    padding: 14px 16px;
+  }
+
+  td.mat-mdc-cell {
+    padding: 12px 16px;
+    font-size: 14px;
+    color: $text-dark;
+    border-bottom: 1px solid #f1f5f9;
+  }
+}
+
+.intensity-chip {
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+
+  &.baja { background: #ecfdf5; color: #065f46; }
+  &.moderada { background: #eff6ff; color: #1e40af; }
+  &.alta { background: #fff1f2; color: #9f1239; }
+}
+
+// Catalog Grid
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.exercise-card {
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px solid $card-border;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .exercise-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .exercise-body {
+    text-align: center;
+    mat-icon.preview-icon { font-size: 48px; width: 48px; height: 48px; color: #10b981; margin-bottom: 16px; opacity: 0.6; }
+    h3 { margin: 0 0 12px; font-size: 18px; font-weight: 700; }
+    .duration-info { display: flex; align-items: center; justify-content: center; gap: 8px; color: $text-muted; font-size: 14px; }
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px;
+  color: $text-muted;
+  mat-icon { font-size: 48px; width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.3; }
+}

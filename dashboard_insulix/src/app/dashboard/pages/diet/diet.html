@@ -1,0 +1,173 @@
+<div class="diet-container stagger-1">
+  <header class="page-header">
+    <div class="header-content">
+      <h1>Planes Alimenticios 🥗</h1>
+      <p>Gestiona recetas en el catálogo y asígnalas a tus pacientes.</p>
+    </div>
+    <div class="header-actions">
+      <!-- Cambiar entre vistas -->
+      <div class="view-toggle">
+        <button mat-button [class.active-tab]="viewMode === 'assignments'" (click)="setView('assignments')">
+          <mat-icon>assignment</mat-icon> Seguimiento
+        </button>
+        <button mat-button [class.active-tab]="viewMode === 'catalog'" (click)="setView('catalog')">
+          <mat-icon>menu_book</mat-icon> Catálogo
+        </button>
+      </div>
+
+      <button mat-flat-button color="primary" class="rounded-btn" (click)="viewMode === 'catalog' ? showPlatilloForm = true : showAssignForm = true">
+        <mat-icon>add</mat-icon>
+        {{ viewMode === 'catalog' ? 'Nuevo Platillo' : 'Asignar Dieta' }}
+      </button>
+    </div>
+  </header>
+
+  <!-- ============ MODAL NUEVO PLATILLO ============ -->
+  <div class="modal-overlay" *ngIf="showPlatilloForm">
+    <div class="modal-card">
+      <h3>Nuevo Platillo al Catálogo</h3>
+      <form [formGroup]="platilloForm" (ngSubmit)="savePlatillo()">
+        <div class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre del Platillo</mat-label>
+            <input matInput formControlName="nombre_platillo" placeholder="Ej: Ensalada César">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Categoría</mat-label>
+            <mat-select formControlName="categoria">
+              <mat-option value="Desayuno">Desayuno</mat-option>
+              <mat-option value="Comida">Comida</mat-option>
+              <mat-option value="Cena">Cena</mat-option>
+              <mat-option value="Colación">Colación</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Descripción / Ingredientes</mat-label>
+          <textarea matInput formControlName="platillo" rows="3" placeholder="Detalle de la preparación e ingredientes..."></textarea>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Bebida</mat-label>
+          <input matInput formControlName="bebida" placeholder="Ej: Agua de limón sin azúcar">
+        </mat-form-field>
+
+        <div class="modal-actions">
+          <button type="button" mat-button (click)="showPlatilloForm = false">Cancelar</button>
+          <button type="submit" mat-flat-button color="primary" [disabled]="platilloForm.invalid">Guardar Platillo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ MODAL ASIGNAR DIETA ============ -->
+  <div class="modal-overlay" *ngIf="showAssignForm">
+    <div class="modal-card">
+      <h3>Asignar Dieta a Paciente</h3>
+      <form [formGroup]="assignForm" (ngSubmit)="saveAsignacion()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Seleccionar Paciente</mat-label>
+          <mat-select formControlName="paciente_id" (selectionChange)="onPatientSelect($event)">
+            <mat-option *ngFor="let p of pacientes" [value]="p.id">
+              {{ p.nombre }} {{ p.apellidos }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Seleccionar Platillo del Catálogo</mat-label>
+          <mat-select formControlName="dieta_id">
+            <mat-option *ngFor="let d of catalogo" [value]="d._id">
+              [{{ d.categoria }}] {{ d.nombre_platillo }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <div class="modal-actions">
+          <button type="button" mat-button (click)="showAssignForm = false">Cancelar</button>
+          <button type="submit" mat-flat-button color="primary" [disabled]="assignForm.invalid">Asignar Ahora</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ VISTA: ASIGNACIONES (SEGUIMIENTO) ============ -->
+  <div class="view-content" *ngIf="viewMode === 'assignments'">
+    <div class="table-container fade-in">
+      <table mat-table [dataSource]="asignaciones" class="diet-table">
+        <ng-container matColumnDef="paciente">
+          <th mat-header-cell *matHeaderCellDef>Paciente</th>
+          <td mat-cell *matCellDef="let asig"> {{ asig.paciente_nombre || 'Paciente ID: ' + asig.paciente_id }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="platillo">
+          <th mat-header-cell *matHeaderCellDef>Platillo</th>
+          <td mat-cell *matCellDef="let asig"> {{ asig.dieta_id?.nombre_platillo || 'Cargando...' }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="categoria">
+          <th mat-header-cell *matHeaderCellDef>Tipo</th>
+          <td mat-cell *matCellDef="let asig"> 
+             <span class="diet-type-chip">{{ asig.dieta_id?.categoria }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="fecha">
+          <th mat-header-cell *matHeaderCellDef>Fecha Asignación</th>
+          <td mat-cell *matCellDef="let asig"> {{ asig.fecha_asignacion | date:'dd/MM/yyyy HH:mm' }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let asig">
+            <button mat-icon-button color="warn" matTooltip="Quitar asignación">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+
+      <div class="empty-state" *ngIf="asignaciones.length === 0">
+        <mat-icon>no_meals</mat-icon>
+        <p>No hay pacientes con dietas asignadas todavía.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ VISTA: CATÁLOGO ============ -->
+  <div class="view-content" *ngIf="viewMode === 'catalog'">
+    <div class="catalog-grid">
+      <mat-card *ngFor="let dish of catalogo" class="dish-card custom-elevation">
+        <div class="dish-header">
+          <span class="category-tag" [ngClass]="dish.categoria.toLowerCase()">{{ dish.categoria }}</span>
+          <button mat-icon-button [matMenuTriggerFor]="dishMenu">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #dishMenu="matMenu">
+            <button mat-menu-item (click)="deletePlatillo(dish._id!)">
+              <mat-icon>delete</mat-icon> <span>Eliminar</span>
+            </button>
+          </mat-menu>
+        </div>
+        <div class="dish-body">
+          <h3>{{ dish.nombre_platillo }}</h3>
+          <p class="ingredients">{{ dish.platillo }}</p>
+          <div class="drink">
+            <mat-icon>local_library</mat-icon>
+            <span>Bebida: {{ dish.bebida }}</span>
+          </div>
+        </div>
+      </mat-card>
+    </div>
+
+    <div class="empty-state" *ngIf="catalogo.length === 0">
+      <mat-icon>restaurant_menu</mat-icon>
+      <p>El catálogo está vacío. ¡Empieza creando tu primer platillo!</p>
+    </div>
+  </div>
+</div>

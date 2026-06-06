@@ -1,0 +1,62 @@
+<nav class="navbar">
+  <!-- Left: Logo -->
+  <div class="navbar-logo">
+    <img src="/images/Logo2_Insulix_no_bg.png" alt="Logo Insulix" style="height: auto; width: 190px; object-fit: contain;">
+  </div>
+
+  <!-- Center: Navigation Pills -->
+  <ul class="navbar-nav">
+    <li></li>
+    <li class="nav-item">
+      <a routerLink="/dashboard/home" routerLinkActive="active" class="nav-link">
+        <mat-icon class="nav-icon">dashboard</mat-icon>
+        <span>Inicio</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a routerLink="/dashboard/patients" routerLinkActive="active" class="nav-link">
+        <mat-icon class="nav-icon">people</mat-icon>
+        <span>Pacientes</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a routerLink="/dashboard/diet" routerLinkActive="active" class="nav-link">
+        <mat-icon class="nav-icon">restaurant</mat-icon>
+        <span>Dietas</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a routerLink="/dashboard/physical-activity" routerLinkActive="active" class="nav-link">
+        <mat-icon class="nav-icon">fitness_center</mat-icon>
+        <span>Actividad física</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a routerLink="/dashboard/reports" routerLinkActive="active" class="nav-link">
+        <mat-icon class="nav-icon">description</mat-icon>
+        <span>Reportes</span>
+      </a>
+    </li>
+  </ul>
+
+  <!-- Right: Actions and Profile -->
+  <div class="navbar-actions">
+    <div class="settings-pill">
+      <button mat-icon-button class="pill-btn">
+        <mat-icon>notifications</mat-icon>
+      </button>
+      <div class="pill-divider"></div>
+      <button mat-icon-button class="pill-btn">
+        <mat-icon>settings</mat-icon>
+      </button>
+    </div>
+    
+    <div class="user-profile">
+      <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User avatar" class="avatar" />
+      <div class="user-info">
+        <span class="user-name">{{ authService.currentUser()?.nombre || 'Usuario' }}</span>
+        <span class="user-role">{{ authService.currentUser()?.role === 'MEDICO' ? 'Doctor' : (authService.currentUser()?.role || 'Personal') }}</span>
+      </div>
+    </div>
+  </div>
+</nav>

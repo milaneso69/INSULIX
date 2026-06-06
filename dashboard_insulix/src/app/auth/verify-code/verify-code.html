@@ -1,0 +1,104 @@
+<div class="login-container">
+    <!-- Animación de fondo de Radar -->
+    <div class="sensor-scanner">
+        <div class="scanner-circle outer"></div>
+        <div class="scanner-circle inner"></div>
+        <div class="scanner-line"></div>
+        <div class="scanner-blips">
+            <div class="blip b1"></div>
+            <div class="blip b2"></div>
+            <div class="blip b3"></div>
+            <div class="blip b4"></div>
+        </div>
+    </div>
+
+    <div class="login-card">
+        <div class="login-left verify-left">
+            <div class="left-content">
+                <h2>Seguridad en</h2>
+                <div class="logo-box">
+                    <div class="logo-circle">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M13.13 22.19l-1.63-3.83c1.55-.58 3.18-1.58 4.77-3.17l3.83 1.63c.53.23.65.94.21 1.34l-3.32 3.32c-.52.51-1.35.48-1.86-.01zm-5.69-7.2l-3.83-1.63c-.53-.23-.65-.94-.21-1.34l3.32-3.32c.52-.51 1.35-.48 1.86.01l1.63 3.83c-1.55.58-3.18 1.58-4.77 3.17zM21.26 2.74c1.17 1.17 1.25 3.36-.08 6.46-1.55 3.59-4.22 6.55-7.58 8.44l-4.27 4.27c-1.12 1.12-2.95 1.12-4.08 0l-2.5-2.5c-1.12-1.12-1.12-2.95 0-4.08l4.27-4.27c1.89-3.36 4.85-6.03 8.44-7.58 3.1-1.33 5.29-1.25 6.46-.08z" />
+                        </svg>
+                    </div>
+                    <h1>INSULIX</h1>
+                </div>
+
+                <!-- Circular Timer -->
+                <div class="circular-timer-wrapper" [class.expired]="isExpired()">
+                    <mat-progress-spinner 
+                        mode="determinate" 
+                        [value]="progressPercentage()" 
+                        [diameter]="100"
+                        [color]="isExpired() ? 'warn' : 'accent'"
+                        class="custom-spinner">
+                    </mat-progress-spinner>
+                    <div class="timer-text">
+                        {{ timerDisplay() }}
+                    </div>
+                </div>
+                
+                <p class="description">Protegiendo el acceso a tu información médica y a la de tus pacientes.</p>
+            </div>
+            <div class="footer-links">
+                <span>&copy; 2026 INSULIX. Todos los derechos reservados.</span>
+            </div>
+        </div>
+        
+        <div class="login-right">
+            <div class="right-content">
+                <h2>Verifica tu identidad</h2>
+                
+                <div class="verify-instructions">
+                    <p>Hemos enviado un código a:</p>
+                    <span class="email-highlight">{{ userEmail() }}</span>
+                </div>
+
+                <div *ngIf="errorMessage()" class="alert-message error">
+                    <mat-icon>error_outline</mat-icon>
+                    <span>{{ errorMessage() }}</span>
+                </div>
+                
+                <div *ngIf="successMessage()" class="alert-message success">
+                    <mat-icon>check_circle</mat-icon>
+                    <span>{{ successMessage() }}</span>
+                </div>
+
+                <form class="login-form code-form">
+                    <div class="input-group">
+                        <label>Código de 6 dígitos</label>
+                        <div class="digit-inputs-group">
+                            <input *ngFor="let digit of codeDigits; let i = index; trackBy: trackByIndex" 
+                                   #digitInput
+                                   class="digit-box" 
+                                   type="text" 
+                                   inputmode="numeric"
+                                   maxlength="1" 
+                                   [value]="codeDigits[i]"
+                                   (input)="onDigitInput($event, i)"
+                                   (keydown)="onKeyDown($event, i)"
+                                   (paste)="onPaste($event)"
+                                   [disabled]="isLoading() || isExpired()">
+                        </div>
+                    </div>
+
+                    <div class="action-buttons-column">
+                        <button mat-flat-button color="primary" class="full-width-btn" type="button" 
+                                [disabled]="fullCode.length !== 6 || isLoading() || isExpired()" 
+                                (click)="onVerify()">
+                            {{ isLoading() ? 'VERIFICANDO...' : 'ACCEDER' }}
+                        </button>
+                    </div>
+                    
+                    <div class="verify-footer mt-4">
+                        <ng-container *ngIf="!isLoading()">
+                            <p class="resend-text">¿No recibiste el código? <a href="javascript:void(0)" class="action-link" (click)="resendCode()">Re-enviar</a></p>
+                        </ng-container>
+                        <a routerLink="/login" class="action-link bold">Volver al inicio de sesión</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

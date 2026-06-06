@@ -1,0 +1,221 @@
+<div class="patients-container stagger-1">
+  <header class="page-header">
+    <div class="header-content">
+      <h1>Lista de Pacientes</h1>
+      <p>Haz clic en un paciente para ver su detalle.</p>
+    </div>
+    <div class="header-actions">
+       <button mat-flat-button color="primary" class="rounded-btn" (click)="openModal()">
+         <mat-icon>add</mat-icon>
+         Nuevo paciente
+       </button>
+    </div>
+  </header>
+
+  <div class="main-layout stagger-2">
+
+
+    <!-- ============ CONTENIDO PRINCIPAL ============ -->
+    <div class="content-area">
+
+      <!-- Barra de acciones masivas -->
+      <div class="bulk-bar" *ngIf="selectedCount > 0">
+        <div class="bulk-info">
+          <mat-icon>check_circle</mat-icon>
+          <span>{{ selectedCount }} paciente{{ selectedCount > 1 ? 's' : '' }} seleccionado{{ selectedCount > 1 ? 's' : '' }}</span>
+        </div>
+        <div class="bulk-actions">
+          <button class="bulk-btn" matTooltip="Enviar mensaje a seleccionados">
+            <mat-icon>chat</mat-icon>
+            <span>Mensaje</span>
+          </button>
+          <button class="bulk-btn" matTooltip="Exportar datos">
+            <mat-icon>download</mat-icon>
+            <span>Exportar</span>
+          </button>
+          <button class="bulk-btn bulk-danger" matTooltip="Eliminar seleccionados">
+            <mat-icon>delete</mat-icon>
+            <span>Eliminar</span>
+          </button>
+        </div>
+        <button class="bulk-close" (click)="clearSelection()" matTooltip="Limpiar selección">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <!-- Panel de detalle del paciente activo -->
+      <div class="detail-panel" *ngIf="showDetail">
+        <div class="detail-card">
+          <div class="detail-photo-section">
+            <img [src]="activePatient!.foto_url" [alt]="activePatient!.nombre" class="detail-avatar">
+            <div class="detail-basic-info">
+              <h2>{{ activePatient!.nombre }} {{ activePatient!.apellidos }}</h2>
+              <p class="detail-age">{{ activePatient!.edad }} años &bull; {{ activePatient!.sexo }} &bull; {{ activePatient!.tipo_diabetes }}</p>
+              <div class="detail-contact">
+                <button mat-icon-button matTooltip="Mensaje">
+                  <mat-icon>chat</mat-icon>
+                </button>
+                <button mat-icon-button matTooltip="Llamar">
+                  <mat-icon>phone</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-divider"></div>
+
+          <div class="detail-diagnosis-section">
+            <div class="detail-stats-row">
+              <div class="stat-card" [ngClass]="activePatient!.estado">
+                <mat-icon class="stat-trend-icon">{{ getTendenciaIcon(activePatient!.tendencia) }}</mat-icon>
+                <div class="stat-value">{{ activePatient!.ultima_lectura_valor }} mg/dL</div>
+                <div class="stat-label">Última lectura: {{ activePatient!.ultima_lectura_fecha }}</div>
+                <div class="stat-sublabel">Info basal: {{ activePatient!.glucosa_base }} mg/dL</div>
+              </div>
+              <div class="stat-card neutral">
+                <mat-icon class="stat-trend-icon">medication</mat-icon>
+                <div class="stat-value">{{ activePatient!.tratamiento_activo }}</div>
+                <div class="stat-label">Tratamiento activo</div>
+              </div>
+              <div class="stat-card neutral">
+                <mat-icon class="stat-trend-icon">phone</mat-icon>
+                <div class="stat-value">{{ activePatient!.telefono }}</div>
+                <div class="stat-label">Teléfono de contacto</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-divider"></div>
+
+          <div class="detail-actions">
+            <button class="action-btn action-edit" matTooltip="Editar paciente">
+              <mat-icon>edit</mat-icon>
+              <span>Editar</span>
+            </button>
+            <button class="action-btn action-history" matTooltip="Historial clínico">
+              <mat-icon>assignment</mat-icon>
+              <span>Historial</span>
+            </button>
+            <button class="action-btn action-delete" matTooltip="Eliminar paciente">
+              <mat-icon>delete</mat-icon>
+              <span>Eliminar</span>
+            </button>
+          </div>
+
+          <button class="detail-close" (click)="activePatient = null" matTooltip="Cerrar detalle">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Controles de búsqueda y filtros -->
+      <div class="controls-section stagger-3">
+        <div class="search-box">
+          <mat-icon class="search-icon">search</mat-icon>
+          <input type="text" placeholder="Buscar por nombre..." [(ngModel)]="searchTerm">
+        </div>
+        <div class="filter-group">
+          <button class="filter-btn" [class.active]="currentFilter === 'todos'" (click)="setFilter('todos')">Todos</button>
+          <button class="filter-btn" [class.active]="currentFilter === 'alto'" (click)="setFilter('alto')">Alto</button>
+          <button class="filter-btn" [class.active]="currentFilter === 'estable'" (click)="setFilter('estable')">Estable</button>
+          <button class="filter-btn" [class.active]="currentFilter === 'bajo'" (click)="setFilter('bajo')">Bajo</button>
+        </div>
+      </div>
+
+      <!-- ============ TABLA ============ -->
+      <div class="table-container stagger-3">
+        <table mat-table [dataSource]="pacientesFiltrados" class="patients-table">
+
+          <!-- Checkbox Column -->
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef>
+              <mat-checkbox
+                [checked]="isAllSelected()"
+                [indeterminate]="selectedPatientIds.size > 0 && !isAllSelected()"
+                (change)="toggleAllSelection()">
+              </mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let patient">
+              <mat-checkbox
+                [checked]="isSelected(patient)"
+                (change)="toggleSelection(patient)">
+              </mat-checkbox>
+            </td>
+          </ng-container>
+
+          <!-- Nombre Column -->
+          <ng-container matColumnDef="paciente">
+            <th mat-header-cell *matHeaderCellDef>Paciente</th>
+            <td mat-cell *matCellDef="let patient">
+              <div class="cell-patient-name">
+                <span>{{ patient.nombre }} {{ patient.apellidos }}</span>
+                <span class="cell-diagnosis">{{ patient.tipo_diabetes }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Edad Column -->
+          <ng-container matColumnDef="edad">
+            <th mat-header-cell *matHeaderCellDef>Edad</th>
+            <td mat-cell *matCellDef="let patient">{{ patient.edad }} años</td>
+          </ng-container>
+
+          <!-- Glucosa Column (con tendencia) -->
+          <ng-container matColumnDef="glucosa">
+            <th mat-header-cell *matHeaderCellDef>Glucosa</th>
+            <td mat-cell *matCellDef="let patient">
+              <div class="cell-glucosa">
+                <span class="glucose-badge" [ngClass]="patient.estado">{{ patient.ultima_lectura_valor }}</span>
+                <mat-icon class="trend-icon" [ngClass]="patient.tendencia">{{ getTendenciaIcon(patient.tendencia) }}</mat-icon>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Estado Column -->
+          <ng-container matColumnDef="estado">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let patient">
+              <span class="estado-chip" [ngClass]="patient.estado">{{ getEstadoLabel(patient.estado) }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Ultima Lectura Column -->
+          <ng-container matColumnDef="ultima_lectura_fecha">
+            <th mat-header-cell *matHeaderCellDef>Última lectura</th>
+            <td mat-cell *matCellDef="let patient">{{ patient.ultima_lectura_fecha }}</td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+              [class.selected-row]="isSelected(row)"
+              [class.active-row]="activePatient?.id === row.id"
+              (click)="onRowClick(row, $event)"></tr>
+        </table>
+      </div>
+
+      <!-- Estado vacío -->
+      <div class="empty-state" *ngIf="filteredPatientsComplete.length === 0">
+        <mat-icon>search_off</mat-icon>
+        <p>No se encontraron pacientes que coincidan con la búsqueda.</p>
+      </div>
+
+      <!-- Paginación Footer -->
+      <div class="pagination-footer stagger-4" *ngIf="filteredPatientsComplete.length > 0">
+        <div class="pagination-info">Mostrando {{pacientesFiltrados.length}} de {{filteredPatientsComplete.length}} pacientes</div>
+        <div class="pagination-controls">
+          <button mat-icon-button [disabled]="currentPage === 1" (click)="prevPage()"><mat-icon>chevron_left</mat-icon></button>
+          <button mat-icon-button class="page-number" *ngFor="let page of pages" [class.active]="currentPage === page" (click)="goToPage(page)">{{page}}</button>
+          <button mat-icon-button [disabled]="currentPage === totalPages" (click)="nextPage()"><mat-icon>chevron_right</mat-icon></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para agregar paciente -->
+<app-patients-modal 
+  *ngIf="showModal" 
+  (close)="closeModal()" 
+  (patientCreated)="onPatientCreated($event)">
+</app-patients-modal>
+

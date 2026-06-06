@@ -1,0 +1,405 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+$primary-blue: #1b62b9;
+$secondary-blue: #2374d6;
+$text-dark: #333;
+$text-light: #aaa;
+$danger-red: #e74c3c;
+
+:host {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  background: radial-gradient(circle at center, #f8fafc 0%, #e2e8f0 100%); /* Fondo claro */
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+mat-icon {
+  font-family: 'Material Icons' !important;
+}
+
+.login-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* --- Animación de Escáner de Sensor (Radar) --- */
+.sensor-scanner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120vh;
+  height: 120vh;
+  z-index: 0;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .scanner-circle {
+    position: absolute;
+    border-radius: 50%;
+    
+    &.outer {
+      width: 100%;
+      height: 100%;
+      border: 3px dashed rgba($primary-blue, 0.25);
+      animation: scan-spin 40s linear infinite;
+    }
+    
+    &.inner {
+      width: 55%;
+      height: 55%;
+      border: 2px solid rgba($primary-blue, 0.3);
+      background: radial-gradient(circle at center, rgba($primary-blue, 0.03) 0%, transparent 60%);
+      box-shadow: 0 0 50px rgba($primary-blue, 0.1), inset 0 0 30px rgba($primary-blue, 0.05);
+    }
+  }
+
+  .scanner-line {
+    position: absolute;
+    width: 50%;
+    height: 2px;
+    background: linear-gradient(90deg, rgba($primary-blue, 0) 0%, rgba($primary-blue, 0.5) 100%);
+    top: 50%;
+    left: 50%;
+    transform-origin: left center;
+    animation: radar-sweep 5s linear infinite;
+    box-shadow: 0 0 15px rgba($primary-blue, 0.4);
+
+    &::before {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: -4px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: $primary-blue;
+      box-shadow: 0 0 12px $primary-blue, 0 0 25px rgba($primary-blue, 0.8);
+    }
+  }
+
+  .scanner-blips {
+    position: absolute;
+    width: 60%;
+    height: 60%;
+    
+    .blip {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background: $primary-blue;
+      border-radius: 50%;
+      box-shadow: 0 0 15px $primary-blue, 0 0 30px rgba($primary-blue, 0.8);
+      opacity: 0;
+      transform: scale(0);
+      animation: blip-pulse 5s infinite;
+    }
+
+    /* Posicionados de forma aleatoria alrededor del radar */
+    .b1 { top: 20%; left: 75%; animation-delay: 0.8s; }
+    .b2 { top: 75%; left: 20%; animation-delay: 2.5s; }
+    .b3 { top: 85%; left: 65%; animation-delay: 3.8s; }
+    .b4 { top: 35%; left: 15%; animation-delay: 4.2s; }
+  }
+}
+
+@keyframes scan-spin {
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes radar-sweep {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes blip-pulse {
+  0% { transform: scale(0); opacity: 0; }
+  5% { transform: scale(1.5); opacity: 1; }
+  15% { transform: scale(1); opacity: 0.6; }
+  40% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(0); opacity: 0; }
+}
+
+.login-card {
+  width: 900px;
+  height: 550px;
+  background: #ffffff;
+  border-radius: 24px;
+  display: flex;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+/* LADO IZQUIERDO - AZUL */
+.login-left {
+  flex: 4;
+  background: linear-gradient(135deg, $primary-blue 0%, #1582e0 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 40px;
+  text-align: center;
+
+  .left-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+
+    h2 {
+      font-size: 24px;
+      font-weight: 500;
+      margin-bottom: 40px;
+    }
+
+    .logo-box {
+      margin-bottom: 30px;
+
+      .logo-circle {
+        width: 100px;
+        height: 100px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto 10px;
+
+        svg {
+          width: 50px;
+          height: 50px;
+          color: $primary-blue;
+          transform: rotate(45deg);
+        }
+      }
+
+      h1 {
+        font-size: 28px;
+        font-weight: 600;
+        letter-spacing: 1px;
+      }
+    }
+
+    .description {
+      font-size: 12px;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.8);
+      max-width: 85%;
+    }
+  }
+
+  .footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    font-size: 10px;
+
+    a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+    }
+  }
+}
+
+/* LADO DERECHO - FORMULARIO */
+.login-right {
+  flex: 5;
+  padding: 40px 60px 40px 80px; 
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; 
+  align-items: center; 
+
+  .right-content {
+    max-width: 350px;
+    width: 100%;
+    margin-top: 20px; 
+
+    .lockout-banner-minimal {
+      background: rgba($danger-red, 0.05);
+      border: 1px solid rgba($danger-red, 0.2);
+      border-radius: 8px;
+      padding: 10px 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      color: $danger-red;
+      animation: slideDown 0.3s ease-out;
+
+      mat-icon { font-size: 20px; width: 20px; height: 20px; }
+      
+      .lockout-text {
+        font-size: 13px;
+        strong { font-family: monospace; font-size: 14px; background: rgba($danger-red, 0.1); padding: 2px 6px; border-radius: 4px;}
+      }
+    }
+
+    .alert-message {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      animation: slideDown 0.2s ease-out;
+
+      mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
+      &.error {
+        color: #d63031;
+        background: rgba(#d63031, 0.05);
+      }
+
+      &.warning {
+        color: #e67e22;
+        background: rgba(#e67e22, 0.05);
+        border: 1px solid rgba(#e67e22, 0.2);
+      }
+    }
+
+    h2 {
+      color: $text-dark;
+      font-size: 26px;
+      font-weight: 600;
+      margin-bottom: 30px; 
+      text-align: center; 
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+
+      .input-group {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+
+        label {
+          font-size: 14px;
+          font-weight: 600;
+          color: $text-dark;
+          margin-bottom: -5px; 
+          z-index: 1;
+        }
+
+        ::ng-deep .custom-mat-input {
+          width: 100% !important;
+
+          .mat-mdc-text-field-wrapper {
+            padding: 0 !important;
+            background-color: transparent !important;
+          }
+
+          .mat-mdc-form-field-flex {
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid rgba($primary-blue, 0.2);
+            transition: border-color 0.3s;
+            width: 100%;
+          }
+
+          .mat-mdc-form-field-infix {
+            padding: 20px 0 4px 0 !important; 
+            min-height: auto !important;
+            flex: 1;
+          }
+
+          &.mat-focused .mat-mdc-form-field-flex {
+            border-bottom: 2px solid $primary-blue;
+          }
+
+          .toggle-password {
+            color: $text-light !important;
+            transform: scale(0.8);
+            margin-bottom: -5px; 
+            
+            &:hover { color: $primary-blue !important; }
+            
+            mat-icon {
+              font-size: 22px;
+              width: 22px;
+              height: 22px;
+            }
+          }
+
+          &.mat-form-field-disabled {
+            opacity: 0.6;
+            .mat-mdc-form-field-flex { border-bottom-style: dashed; }
+          }
+
+          .mdc-line-ripple, .mdc-text-field__ripple, .mat-mdc-form-field-subscript-wrapper {
+            display: none;
+          }
+        }
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+
+        .btn-primary, .btn-secondary {
+          flex: 1; 
+          height: 48px;
+          border-radius: 30px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: 'Poppins', sans-serif;
+          font-size: 13px;
+          font-weight: 500;
+          padding: 0 !important;
+          text-decoration: none;
+        }
+
+        .btn-primary {
+          background: linear-gradient(to right, #1871df, #1059b0) !important;
+          color: white !important;
+
+          &:disabled {
+            background: #ccc !important;
+            cursor: not-allowed;
+          }
+        }
+
+        .btn-secondary {
+          border: 1px solid #ddd !important;
+          color: $text-light !important;
+          background: white !important;
+
+          &:hover {
+            color: $primary-blue !important;
+            border-color: $primary-blue !important;
+          }
+        }
+      }
+    }
+  }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

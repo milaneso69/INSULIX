@@ -1,0 +1,70 @@
+<div class="login-container">
+    <!-- Animación de fondo de Radar -->
+    <div class="sensor-scanner">
+        <div class="scanner-circle outer"></div>
+        <div class="scanner-circle inner"></div>
+        <div class="scanner-line"></div>
+        <div class="scanner-blips">
+            <div class="blip b1"></div>
+            <div class="blip b2"></div>
+            <div class="blip b3"></div>
+            <div class="blip b4"></div>
+        </div>
+    </div>
+
+    <div class="login-card">
+        <div class="login-left">
+            <div class="left-content">
+                <h2>Bienvenido a</h2>
+                <div class="logo-box">
+                    <img src="/images/Logo_Insulix_no_bg.png" alt="Logo Insulix" style="max-width: 350px; height: auto; object-fit: contain; margin-bottom: 10px;">
+                </div>
+                <p class="description">Tu plataforma de confianza para la gestión de tus pacientes.</p>
+            </div>
+            <div class="footer-links">
+                <span>&copy; 2026 INSULIX. Todos los derechos reservados.</span>
+            </div>
+        </div>
+        <div class="login-right">
+            <div class="right-content">
+                
+                <div *ngIf="errorMessage()" class="alert-message error">
+                    <mat-icon>error_outline</mat-icon>
+                    <span>{{ errorMessage() }}</span>
+                </div>
+
+                <div *ngIf="warningMessage() && !isLockedOut()" class="alert-message warning">
+                    <mat-icon>warning_amber</mat-icon>
+                    <span>{{ warningMessage() }}</span>
+                </div>
+
+                <h2>Inicia sesión</h2>
+                <form class="login-form">
+                    <div class="input-group">
+                        <label>Correo electrónico</label>
+                        <mat-form-field appearance="fill" class="custom-mat-input">
+                            <input matInput type="email" name="email" [(ngModel)]="email" placeholder="ejemplo@correo.com" [disabled]="isLockedOut()" />
+                        </mat-form-field>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Contraseña</label>
+                        <mat-form-field appearance="fill" class="custom-mat-input">
+                            <input matInput [type]="hide() ? 'password' : 'text'" name="password" [(ngModel)]="password" placeholder="Ingrese su contraseña" [disabled]="isLockedOut()" />
+                            <button mat-icon-button matSuffix class="toggle-password" type="button" (click)="togglePassword($event)" [disabled]="isLockedOut()">
+                                <mat-icon>{{ hide() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                            </button>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button mat-flat-button color="primary" class="btn-primary" type="button" [disabled]="isLoading() || isLockedOut()" (click)="onLogin()">
+                            {{ isLoading() ? 'CARGANDO...' : (isLockedOut() ? 'BLOQUEADO: Espera ' + lockoutTimer() : 'INICIAR SESIÓN') }}
+                        </button>
+                        <a mat-stroked-button color="primary" class="btn-secondary" routerLink="/register" *ngIf="!isLockedOut()">Registrarse</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

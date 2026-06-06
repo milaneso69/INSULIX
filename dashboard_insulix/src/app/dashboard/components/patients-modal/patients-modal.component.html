@@ -1,0 +1,205 @@
+<div class="modal-backdrop" (click)="close.emit()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <button class="btn-close" (click)="close.emit()">
+      <mat-icon>close</mat-icon>
+    </button>
+    <div class="modal-header">
+      <h2><mat-icon>person_add</mat-icon> Registrar Paciente</h2>
+      <p>Agrega un nuevo paciente y conéctalo a Firebase Automáticamente.</p>
+    </div>
+
+    <form [formGroup]="patientForm" (ngSubmit)="onSubmit()" class="modal-form">
+      <div class="form-grid">
+        <!-- ============ DATOS PERSONALES ============ -->
+        <h3 class="section-title">Datos Personales</h3>
+        
+        <div class="input-group">
+          <label>Nombre</label>
+          <div class="input-wrapper">
+            <mat-icon>person</mat-icon>
+            <input type="text" formControlName="nombre" placeholder="Ej. Juan">
+          </div>
+        </div>
+
+        <div class="input-row">
+          <div class="input-group">
+            <label>Apellido Paterno</label>
+            <div class="input-wrapper">
+              <input type="text" formControlName="apellidoPaterno" placeholder="Pérez">
+            </div>
+          </div>
+          <div class="input-group">
+            <label>Apellido Materno (Opc.)</label>
+            <div class="input-wrapper">
+              <input type="text" formControlName="apellidoMaterno" placeholder="García">
+            </div>
+          </div>
+        </div>
+
+        <div class="input-row">
+          <div class="input-group">
+            <label>Fecha Nacimiento</label>
+            <div class="input-wrapper">
+              <mat-icon>calendar_today</mat-icon>
+              <input type="date" formControlName="fechaNacimiento">
+            </div>
+          </div>
+          <div class="input-group">
+            <label>Sexo</label>
+            <div class="input-wrapper select-wrapper">
+              <mat-icon>wc</mat-icon>
+              <select formControlName="sexo">
+                <option value="M">Masculino</option>
+                <option value="F">Femenino</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ INFORMACIÓN MÉDICA ============ -->
+        <h3 class="section-title">Información Clínica</h3>
+
+        <div class="input-row">
+          <div class="input-group">
+            <label>Tipo de Diabetes</label>
+            <div class="input-wrapper select-wrapper">
+              <mat-icon>medical_services</mat-icon>
+              <select formControlName="tipoDiabetes">
+                <option value="Tipo 1">Tipo 1</option>
+                <option value="Tipo 2">Tipo 2</option>
+                <option value="Gestacional">Gestacional</option>
+                <option value="Otro">Prediabetes (Otro)</option>
+              </select>
+            </div>
+          </div>
+          <div class="input-group">
+            <label>Glucosa Base (mg/dL)</label>
+            <div class="input-wrapper number-stepper">
+              <button type="button" (click)="decrement('glucosaBase', 5)"><mat-icon>remove</mat-icon></button>
+              <input type="number" formControlName="glucosaBase">
+              <button type="button" (click)="increment('glucosaBase', 5)"><mat-icon>add</mat-icon></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="input-row">
+          <div class="input-group">
+            <label>Peso (kg)</label>
+            <div class="input-wrapper number-stepper">
+              <button type="button" (click)="decrement('peso', 1)"><mat-icon>remove</mat-icon></button>
+              <input type="number" formControlName="peso">
+              <button type="button" (click)="increment('peso', 1)"><mat-icon>add</mat-icon></button>
+            </div>
+          </div>
+          <div class="input-group">
+            <label>Estatura (m)</label>
+            <div class="input-wrapper number-stepper">
+              <button type="button" (click)="decrement('estatura', 0.01)"><mat-icon>remove</mat-icon></button>
+              <input type="number" formControlName="estatura" step="0.01">
+              <button type="button" (click)="increment('estatura', 0.01)"><mat-icon>add</mat-icon></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ UBICACIÓN ============ -->
+        <h3 class="section-title">Ubicación (Autocompletado)</h3>
+
+        <div class="input-row split-1-2">
+          <div class="input-group">
+            <label>Código Postal</label>
+            <div class="input-wrapper">
+              <mat-icon>markunread_mailbox</mat-icon>
+              <input type="text" formControlName="cp" placeholder="12345" maxlength="5">
+            </div>
+            <small class="hint" *ngIf="patientForm.get('cp')?.valid">Autocompletando estado...</small>
+          </div>
+          <div class="input-group">
+            <label>Calle y Número</label>
+            <div class="input-wrapper">
+              <mat-icon>home</mat-icon>
+              <input type="text" formControlName="calle1" placeholder="Av. Principal 123">
+            </div>
+          </div>
+        </div>
+
+        <div class="input-row">
+          <div class="input-group">
+            <label>Estado</label>
+            <div class="input-wrapper select-wrapper">
+              <mat-icon>map</mat-icon>
+              <select formControlName="estado">
+                <option value="" disabled selected>Selecciona Estado</option>
+                <option *ngFor="let m_est of estados" [value]="m_est">{{m_est}}</option>
+              </select>
+            </div>
+          </div>
+          <div class="input-group">
+            <label>Ciudad</label>
+            <div class="input-wrapper select-wrapper">
+              <mat-icon>location_city</mat-icon>
+              <select formControlName="ciudad">
+                <option value="" disabled selected>Selecciona Ciudad</option>
+                <option *ngFor="let m_ciu of ciudadesFiltradas" [value]="m_ciu">{{m_ciu}}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ SEGURIDAD ============ -->
+        <h3 class="section-title autogen-warning">
+          <mat-icon>security</mat-icon> Acceso de Paciente (Firebase)
+        </h3>
+
+        <div class="input-row split-1-2">
+          <div class="input-group">
+            <label>Teléfono</label>
+            <div class="input-wrapper">
+              <mat-icon>phone</mat-icon>
+              <input type="text" formControlName="telefono" placeholder="123-456-7890" (input)="onPhoneInput($event)">
+            </div>
+          </div>
+          <div class="input-group">
+            <label>Correo Electrónico</label>
+            <div class="input-wrapper">
+              <mat-icon>email</mat-icon>
+              <input type="email" formControlName="email" placeholder="paciente@correo.com">
+            </div>
+          </div>
+        </div>
+
+        <div class="input-row">
+          <div class="input-group">
+            <label>Contraseña</label>
+            <div class="input-wrapper">
+              <mat-icon>lock</mat-icon>
+              <input type="password" formControlName="password" placeholder="Contraseña segura">
+            </div>
+            <small class="error-text" *ngIf="patientForm.hasError('passwordWeak', ['password']) && patientForm.get('password')?.touched">
+              Debe incluir mayúscula, minúscula y número.
+            </small>
+          </div>
+          <div class="input-group">
+            <label>Confirmar Contraseña</label>
+            <div class="input-wrapper">
+              <mat-icon>lock_outline</mat-icon>
+              <input type="password" formControlName="confirmPassword" placeholder="Confirmar">
+            </div>
+            <small class="error-text" *ngIf="patientForm.hasError('notMatching') && patientForm.get('confirmPassword')?.touched">
+              Las contraseñas no coinciden.
+            </small>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" (click)="close.emit()" [disabled]="isSubmitting">Cancelar</button>
+        <button type="submit" class="btn-submit" [disabled]="isSubmitting">
+          <mat-icon *ngIf="!isSubmitting">save</mat-icon>
+          <mat-icon *ngIf="isSubmitting" class="spinner">sync</mat-icon>
+          {{ isSubmitting ? 'Guardando...' : 'Registrar Paciente' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,243 @@
+<div class="login-container">
+    <div class="sensor-scanner">
+        <div class="scanner-circle outer"></div>
+        <div class="scanner-circle inner"></div>
+        <div class="scanner-line"></div>
+        <div class="scanner-blips">
+            <div class="blip b1"></div>
+            <div class="blip b2"></div>
+            <div class="blip b3"></div>
+            <div class="blip b4"></div>
+        </div>
+    </div>
+
+    <div class="login-card custom-register-card">
+        <div class="login-right register-form-panel">
+            <div class="right-content register-content">
+                <h2>Regístrate</h2>
+                
+                <form class="login-form-wrapper" [formGroup]="registerForm">
+                    <!-- PASO 1: CORREO -->
+                    <div class="login-form" *ngIf="currentStep() === 1" formGroupName="step1" [ngClass]="{'shake': shakeError() === 1}">
+                        <div class="input-group">
+                            <label>Correo electrónico <span class="required-asterisk" title="Campo obligatorio">*</span></label>
+                            <mat-form-field appearance="fill" class="custom-mat-input" [class.is-invalid]="step1.get('email')?.invalid && step1.get('email')?.touched">
+                                <input matInput type="email" formControlName="email" placeholder="ejemplo@correo.com" />
+                            </mat-form-field>
+                            <div class="error-msg" *ngIf="step1.get('email')?.invalid && step1.get('email')?.touched">
+                                <span *ngIf="step1.get('email')?.errors?.['required']">El correo es obligatorio.</span>
+                                <span *ngIf="step1.get('email')?.errors?.['email']">Debe tener un formato válido.</span>
+                                <span *ngIf="step1.get('email')?.errors?.['maxlength']">Máximo 100 caracteres.</span>
+                            </div>
+                        </div>
+
+                        <div class="action-buttons">
+                            <a mat-stroked-button class="btn-secondary" routerLink="/login">Iniciar sesión</a>
+                            <button mat-flat-button type="button" class="btn-primary" (click)="nextStep()" [disabled]="isLoading()">
+                                {{ isLoading() ? 'Enviando...' : 'Siguiente' }}
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- PASO 2: 2FA -->
+                    <div class="login-form" *ngIf="currentStep() === 2" formGroupName="step2" [ngClass]="{'shake': shakeError() === 2}">
+                        <div class="verify-instructions">
+                            <p>Hemos enviado un código a:</p>
+                            <span class="email-highlight">{{ step1.get('email')?.value }}</span>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Código de 6 dígitos <span class="required-asterisk" title="Campo obligatorio">*</span></label>
+                            <div class="digit-inputs-group">
+                                <input *ngFor="let digit of codeDigits; let i = index; trackBy: trackByIndex" 
+                                       #digitInput
+                                       class="digit-box" 
+                                       type="text" 
+                                       inputmode="numeric"
+                                       maxlength="1" 
+                                       [value]="codeDigits[i]"
+                                       (input)="onDigitInput($event, i)"
+                                       (keydown)="onKeyDown($event, i)"
+                                       (paste)="onPaste($event)"
+                                       [disabled]="isLoading() || isExpired()">
+                            </div>
+                        </div>
+
+                        <div class="action-buttons-column mt-4">
+                            <button mat-flat-button class="btn-primary full-width-btn" type="button" 
+                                    [disabled]="fullCode.length !== 6 || isLoading() || isExpired()" 
+                                    (click)="verifyCode()">
+                                {{ isLoading() ? 'VERIFICANDO...' : 'VERIFICAR CORREO' }}
+                            </button>
+                        </div>
+
+                        <div class="verify-footer mt-2">
+                            <p class="resend-text">¿No recibiste el código? <a href="javascript:void(0)" class="action-link" (click)="sendCode()">Re-enviar</a></p>
+                            <button mat-button type="button" class="btn-back-link" (click)="previousStep()">Volver a editar correo</button>
+                        </div>
+                    </div>
+
+                    <!-- PASO 3: NOMBRES -->
+                    <div class="login-form" *ngIf="currentStep() === 3" formGroupName="step3" [ngClass]="{'shake': shakeError() === 3}">
+                        <div class="input-group">
+                            <label>Nombre(s) <span class="required-asterisk" title="Campo obligatorio">*</span></label>
+                            <mat-form-field appearance="fill" class="custom-mat-input" [class.is-invalid]="step3.get('nombre')?.invalid && step3.get('nombre')?.touched">
+                                <input matInput type="text" formControlName="nombre" placeholder="Tu nombre o nombres" />
+                            </mat-form-field>
+                            <div class="error-msg" *ngIf="step3.get('nombre')?.invalid && step3.get('nombre')?.touched">
+                                <span *ngIf="step3.get('nombre')?.errors?.['required']">Mínimo 3 caracteres requeridos.</span>
+                                <span *ngIf="step3.get('nombre')?.errors?.['minlength']">Mínimo 3 caracteres.</span>
+                                <span *ngIf="step3.get('nombre')?.errors?.['maxlength']">Máximo 50 caracteres.</span>
+                                <span *ngIf="step3.get('nombre')?.errors?.['pattern']">Solo se admiten letras.</span>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Apellido paterno <span class="required-asterisk" title="Campo obligatorio">*</span></label>
+                            <mat-form-field appearance="fill" class="custom-mat-input" [class.is-invalid]="step3.get('apellidoPaterno')?.invalid && step3.get('apellidoPaterno')?.touched">
+                                <input matInput type="text" formControlName="apellidoPaterno" placeholder="Primer apellido" />
+                            </mat-form-field>
+                            <div class="error-msg" *ngIf="step3.get('apellidoPaterno')?.invalid && step3.get('apellidoPaterno')?.touched">
+                                <span *ngIf="step3.get('apellidoPaterno')?.errors?.['required']">Mínimo 3 caracteres requeridos.</span>
+                                <span *ngIf="step3.get('apellidoPaterno')?.errors?.['minlength']">Mínimo 3 caracteres.</span>
+                                <span *ngIf="step3.get('apellidoPaterno')?.errors?.['maxlength']">Máximo 40 caracteres.</span>
+                                <span *ngIf="step3.get('apellidoPaterno')?.errors?.['pattern']">Solo se admiten letras.</span>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Apellido materno</label>
+                            <mat-form-field appearance="fill" class="custom-mat-input" [class.is-invalid]="step3.get('apellidoMaterno')?.invalid && step3.get('apellidoMaterno')?.touched">
+                                <input matInput type="text" formControlName="apellidoMaterno" placeholder="Segundo apellido (Opcional)" />
+                            </mat-form-field>
+                            <div class="error-msg" *ngIf="step3.get('apellidoMaterno')?.invalid && step3.get('apellidoMaterno')?.touched">
+                                <span *ngIf="step3.get('apellidoMaterno')?.errors?.['minlength']">Mínimo 3 caracteres.</span>
+                                <span *ngIf="step3.get('apellidoMaterno')?.errors?.['maxlength']">Máximo 40 caracteres.</span>
+                                <span *ngIf="step3.get('apellidoMaterno')?.errors?.['pattern']">Solo se admiten letras.</span>
+                            </div>
+                        </div>
+
+                        <div class="action-buttons">
+                            <button mat-stroked-button type="button" class="btn-secondary" (click)="previousStep()">Atrás</button>
+                            <button mat-flat-button type="button" class="btn-primary" (click)="nextStep()">Siguiente</button>
+                        </div>
+                    </div>
+
+                    <!-- PASO 4: TELEFONO Y CEDULA -->
+                    <div class="login-form" *ngIf="currentStep() === 4" formGroupName="step4" [ngClass]="{'shake': shakeError() === 4}">
+                        <div class="input-group">
+                            <label>Teléfono <span class="required-asterisk" title="Campo obligatorio">*</span></label>
+                            <mat-form-field appearance="fill" class="custom-mat-input" [class.is-invalid]="step4.get('telefono')?.invalid && step4.get('telefono')?.touched">
+                                <input matInput type="tel" formControlName="telefono" placeholder="123-123-1234" (input)="onPhoneInput($event)" />
+                            </mat-form-field>
+                            <div class="error-msg" *ngIf="step4.get('telefono')?.invalid && step4.get('telefono')?.touched">
+                                <span *ngIf="step4.get('telefono')?.errors?.['required']">El teléfono es obligatorio.</span>
+                                <span *ngIf="step4.get('telefono')?.errors?.['pattern']">Formato válido: 123-123-1234 con 10 o más dígitos.</span>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Cédula profesional <span class="required-asterisk" title="Campo obligatorio">*</span></label>
+                            <mat-form-field appearance="fill" class="custom-mat-input" [class.is-invalid]="step4.get('cedula')?.invalid && step4.get('cedula')?.touched">
+                                <input matInput type="text" formControlName="cedula" placeholder="No. de Cédula" />
+                                <div matSuffix class="suffix-btn-container">
+                                    <button mat-flat-button type="button" class="btn-validate" (click)="validateCedula()">Validar</button>
+                                </div>
+                            </mat-form-field>
+                            <div class="error-msg" *ngIf="step4.get('cedula')?.invalid && step4.get('cedula')?.touched">
+                                <span *ngIf="step4.get('cedula')?.errors?.['required']">La cédula es obligatoria.</span>
+                                <span *ngIf="step4.get('cedula')?.errors?.['maxlength']">Máximo 20 caracteres.</span>
+                            </div>
+                        </div>
+
+                        <div class="action-buttons">
+                            <button mat-stroked-button type="button" class="btn-secondary" (click)="previousStep()">Atrás</button>
+                            <button mat-flat-button type="button" class="btn-primary" (click)="nextStep()">Siguiente</button>
+                        </div>
+                    </div>
+
+                    <!-- PASO 5: CONTRASEÑAS -->
+                    <div class="login-form" *ngIf="currentStep() === 5" formGroupName="step5" [ngClass]="{'shake': shakeError() === 5}">
+                        <p class="info-text">Tu correo electrónico verificado servirá para iniciar sesión.</p>
+
+                        <div class="input-group">
+                            <label>Contraseña <span class="required-asterisk" title="Campo obligatorio">*</span></label>
+                            <mat-form-field appearance="fill" class="custom-mat-input" [class.is-invalid]="step5.get('password')?.invalid && step5.get('password')?.touched">
+                                <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="password" placeholder="Mínimo 8, máximo 16 caracteres" />
+                                <button mat-icon-button matSuffix class="toggle-password" type="button" (click)="togglePassword($event)">
+                                    <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                                </button>
+                            </mat-form-field>
+                            <div class="persistent-hint">Requiere una mayúscula, una minúscula y un número.</div>
+                            <div class="error-msg" *ngIf="step5.get('password')?.invalid && step5.get('password')?.touched">
+                                <span *ngIf="step5.get('password')?.errors?.['required']">La contraseña es obligatoria.</span>
+                                <span *ngIf="step5.get('password')?.errors?.['minlength']">Mínimo 8 caracteres.</span>
+                                <span *ngIf="step5.get('password')?.errors?.['maxlength']">Máximo 16 caracteres.</span>
+                                <span *ngIf="step5.get('password')?.errors?.['pattern']">Faltan requisitos de seguridad.</span>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Confirmar contraseña <span class="required-asterisk" title="Campo obligatorio">*</span></label>
+                            <mat-form-field appearance="fill" class="custom-mat-input" [class.is-invalid]="(step5.get('confirmPassword')?.invalid || step5.errors?.['passwordMismatch']) && step5.get('confirmPassword')?.touched">
+                                <input matInput [type]="hideConfirmPassword() ? 'password' : 'text'" formControlName="confirmPassword" placeholder="Repite la contraseña" />
+                                <button mat-icon-button matSuffix class="toggle-password" type="button" (click)="toggleConfirmPassword($event)">
+                                    <mat-icon>{{ hideConfirmPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                                </button>
+                            </mat-form-field>
+                            <div class="error-msg" *ngIf="(step5.get('confirmPassword')?.invalid || step5.errors?.['passwordMismatch']) && step5.get('confirmPassword')?.touched">
+                                <span *ngIf="step5.get('confirmPassword')?.errors?.['required']">Debe confirmar la contraseña.</span>
+                                <span *ngIf="step5.errors?.['passwordMismatch']">Las contraseñas no coinciden.</span>
+                            </div>
+                        </div>
+
+                        <div class="action-buttons">
+                            <button mat-stroked-button type="button" class="btn-secondary" (click)="previousStep()" [disabled]="isLoading()">Atrás</button>
+                            <button mat-flat-button type="button" class="btn-primary" (click)="onRegister()" [disabled]="isLoading()">
+                                <ng-container *ngIf="!isLoading()">REGISTRARSE</ng-container>
+                                <mat-spinner strokeWidth="2" diameter="24" *ngIf="isLoading()" color="accent"></mat-spinner>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="login-left register-info-panel">
+            <div class="left-content">
+                <ng-container *ngIf="currentStep() !== 2">
+                    <h2>Crea tu cuenta en</h2>
+                    <div class="logo-box">
+                        <img src="/images/Logo_Insulix_no_bg.png" alt="Logo Insulix" style="max-width: 350px; height: auto; object-fit: contain; margin-bottom: 10px;">
+                    </div>
+                    <p class="description">Únete a Insulix, tu plataforma de confianza para la gestión de pacientes. Llena todos tus datos para comenzar.</p>
+                </ng-container>
+
+                <ng-container *ngIf="currentStep() === 2">
+                    <h2>Seguridad del Registro</h2>
+                    
+                    <!-- Circular Timer -->
+                    <div class="circular-timer-wrapper" [class.expired]="isExpired()">
+                        <mat-progress-spinner 
+                            mode="determinate" 
+                            [value]="progressPercentage()" 
+                            [diameter]="100"
+                            [color]="isExpired() ? 'warn' : 'accent'"
+                            class="custom-spinner">
+                        </mat-progress-spinner>
+                        <div class="timer-text">
+                            {{ timerDisplay() }}
+                        </div>
+                    </div>
+                    
+                    <p class="description">Estamos verificando que tu correo nos pertenece para proteger la integridad de la plataforma.</p>
+                </ng-container>
+            </div>
+            <div class="footer-links">
+                <a href="#">CREATOR HERE</a>
+                <span>|</span>
+                <a href="#">DESIGNER HERE</a>
+            </div>
+        </div>
+    </div>
+</div>

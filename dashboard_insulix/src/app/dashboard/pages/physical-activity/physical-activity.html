@@ -1,0 +1,192 @@
+<div class="activity-container stagger-1">
+  <header class="page-header">
+    <div class="header-content">
+      <h1>Actividad Física 🏋️‍♂️</h1>
+      <p>Establece rutinas de ejercicio y monitorea el progreso de tus pacientes.</p>
+    </div>
+    <div class="header-actions">
+      <!-- Cambiar entre vistas -->
+      <div class="view-toggle">
+        <button mat-button [class.active-tab]="viewMode === 'assignments'" (click)="setView('assignments')">
+          <mat-icon>assignment</mat-icon> Seguimiento
+        </button>
+        <button mat-button [class.active-tab]="viewMode === 'catalog'" (click)="setView('catalog')">
+          <mat-icon>fitness_center</mat-icon> Catálogo
+        </button>
+      </div>
+
+      <button mat-flat-button color="primary" class="rounded-btn" (click)="viewMode === 'catalog' ? openActivityForm() : openAssignForm()">
+        <mat-icon>add</mat-icon>
+        {{ viewMode === 'catalog' ? 'Nuevo Ejercicio' : 'Asignar Actividad' }}
+      </button>
+    </div>
+  </header>
+
+  <!-- ============ MODAL NUEVA ACTIVIDAD ============ -->
+  <div class="modal-overlay" *ngIf="showActivityFormValue">
+    <div class="modal-card custom-elevation">
+      <h3>Nuevo Ejercicio al Catálogo</h3>
+      <form [formGroup]="activityForm" (ngSubmit)="saveActivity()">
+        <div class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre del Ejercicio</mat-label>
+            <input matInput formControlName="nombre_ejercicio" placeholder="Ej: Caminata rápida">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Intensidad</mat-label>
+            <mat-select formControlName="intensidad">
+              <mat-option value="Baja">Baja</mat-option>
+              <mat-option value="Moderada">Moderada</mat-option>
+              <mat-option value="Alta">Alta</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Duración Sugerida (minutos)</mat-label>
+          <input matInput type="number" formControlName="duracion_min">
+          <span matSuffix>min</span>
+        </mat-form-field>
+
+        <div class="modal-actions">
+          <button type="button" mat-button (click)="closeActivityForm()">Cancelar</button>
+          <button type="submit" mat-flat-button color="primary" [disabled]="activityForm.invalid">Guardar en Catálogo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ MODAL ASIGNAR ACTIVIDAD ============ -->
+  <div class="modal-overlay" *ngIf="showAssignFormValue">
+    <div class="modal-card custom-elevation">
+      <h3>Asignar Ejercicio a Paciente</h3>
+      <form [formGroup]="assignForm" (ngSubmit)="saveAsignacion()">
+        
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Seleccionar Paciente</mat-label>
+          <mat-select formControlName="paciente_id" [compareWith]="compareById" (selectionChange)="onPatientSelect($event)">
+            <mat-option *ngFor="let p of pacientes" [value]="p.id">
+              {{ p.nombre }} {{ p.apellidos }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Seleccionar Ejercicio del Catálogo</mat-label>
+          <mat-select formControlName="actividad_id" [compareWith]="compareById">
+            <mat-option *ngFor="let a of catalogo" [value]="a._id">
+              [{{ a.intensidad }}] {{ a.nombre_ejercicio }} ({{ a.duracion_min }} min)
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Fecha y Hora</mat-label>
+          <input matInput type="datetime-local" formControlName="fecha">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Notas Médicas / Recomendaciones</mat-label>
+          <textarea matInput formControlName="notas_medicas" rows="3" placeholder="Ej: Realizar antes del desayuno..."></textarea>
+        </mat-form-field>
+
+        <div class="modal-actions">
+          <button type="button" mat-button (click)="closeAssignForm()">Cancelar</button>
+          <button type="submit" mat-flat-button color="primary">Asignar Ahora</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ VISTA: ASIGNACIONES (SEGUIMIENTO) ============ -->
+  <div class="view-content" *ngIf="viewMode === 'assignments'">
+    <div class="table-container fade-in">
+      <table mat-table [dataSource]="asignaciones" class="activity-table">
+        
+        <ng-container matColumnDef="paciente">
+          <th mat-header-cell *matHeaderCellDef>Paciente</th>
+          <td mat-cell *matCellDef="let asig"> {{ asig.paciente_nombre }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="ejercicio">
+          <th mat-header-cell *matHeaderCellDef>Ejercicio</th>
+          <td mat-cell *matCellDef="let asig"> 
+            <div class="activity-cell">
+              <mat-icon>{{ getActividadIcon(asig.actividad_id?.nombre_ejercicio || '') }}</mat-icon>
+              <span>{{ asig.actividad_id?.nombre_ejercicio || 'Cargando...' }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="intensidad">
+          <th mat-header-cell *matHeaderCellDef>Intensidad</th>
+          <td mat-cell *matCellDef="let asig"> 
+            <span class="intensity-chip" [ngClass]="asig.actividad_id?.intensidad?.toLowerCase()">
+              {{ asig.actividad_id?.intensidad }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="duracion">
+          <th mat-header-cell *matHeaderCellDef>Duración</th>
+          <td mat-cell *matCellDef="let asig"> {{ asig.actividad_id?.duracion_min }} min </td>
+        </ng-container>
+
+        <ng-container matColumnDef="fecha">
+          <th mat-header-cell *matHeaderCellDef>Fecha Programada</th>
+          <td mat-cell *matCellDef="let asig"> {{ asig.fecha | date:'dd/MM/yyyy HH:mm' }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let asig" class="actions-cell">
+            <button mat-icon-button color="warn" matTooltip="Eliminar asignación" (click)="deleteAsignacion(asig._id!)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+
+      <div class="empty-state" *ngIf="asignaciones.length === 0">
+        <mat-icon>event_busy</mat-icon>
+        <p>No hay actividades físicas asignadas todavía.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ VISTA: CATÁLOGO ============ -->
+  <div class="view-content" *ngIf="viewMode === 'catalog'">
+    <div class="catalog-grid">
+      <mat-card *ngFor="let item of catalogo" class="exercise-card custom-elevation">
+        <div class="exercise-header">
+          <span class="intensity-tag" [ngClass]="item.intensidad.toLowerCase()">{{ item.intensidad }}</span>
+          <button mat-icon-button [matMenuTriggerFor]="exeMenu">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #exeMenu="matMenu">
+            <button mat-menu-item (click)="deleteActivity(item._id!)">
+              <mat-icon>delete</mat-icon> <span>Eliminar del Catálogo</span>
+            </button>
+          </mat-menu>
+        </div>
+        <div class="exercise-body">
+          <mat-icon class="preview-icon">{{ getActividadIcon(item.nombre_ejercicio) }}</mat-icon>
+          <h3>{{ item.nombre_ejercicio }}</h3>
+          <div class="duration-info">
+            <mat-icon>timer</mat-icon>
+            <span>Duración recomendada: {{ item.duracion_min }} min</span>
+          </div>
+        </div>
+      </mat-card>
+    </div>
+
+    <div class="empty-state" *ngIf="catalogo.length === 0">
+      <mat-icon>fitness_center</mat-icon>
+      <p>El catálogo de ejercicios está vacío.</p>
+    </div>
+  </div>
+</div>

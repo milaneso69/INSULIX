@@ -1,0 +1,201 @@
+<div class="dashboard-container">
+  
+  <header class="welcome-header stagger-1">
+    <div class="header-text">
+      <h1>Hola, {{ authService.currentUser()?.role === 'MEDICO' ? 'Dr(a).' : '' }} {{ authService.currentUser()?.nombre || 'Bienvenido' }} {{ authService.currentUser()?.apellido_paterno || '' }} {{ authService.currentUser()?.apellido_materno || '' }}</h1>
+      <p>Este es el resumen del estado actual de tus pacientes de la tercera edad.</p>
+    </div>
+  </header>
+
+  <div class="kpi-grid stagger-2">
+    <!-- Críticos -->
+    <mat-card class="kpi-card-v2 critical custom-elevation">
+      <div class="card-header">
+        <div class="card-title-group">
+          <mat-icon class="icon-critical pulse-animation">warning</mat-icon>
+          <span class="card-title">Pacientes Críticos</span>
+        </div>
+        <button mat-icon-button matTooltip="Ver detalles" class="action-btn">
+          <mat-icon>arrow_forward_ios</mat-icon>
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="main-value">
+          <span class="number">4</span>
+          <span class="trend down" matTooltip="Aumento vs ayer">
+            <mat-icon>trending_up</mat-icon> +1.5%
+          </span>
+        </div>
+        <p class="subtext">Requieren atención inmediata</p>
+        <div class="mini-chart-bg">
+          <div class="bar-decorator red" style="height: 30%"></div>
+          <div class="bar-decorator red" style="height: 50%"></div>
+          <div class="bar-decorator red highlight" style="height: 90%"></div>
+          <div class="bar-decorator red" style="height: 40%"></div>
+        </div>
+      </div>
+    </mat-card>
+
+    <!-- Estables -->
+    <mat-card class="kpi-card-v2 stable custom-elevation">
+      <div class="card-header">
+        <div class="card-title-group">
+          <mat-icon class="icon-stable pulse-animation-green">check_circle</mat-icon>
+          <span class="card-title">Pacientes Estables</span>
+        </div>
+        <button mat-icon-button matTooltip="Ver lista" class="action-btn">
+          <mat-icon>arrow_forward_ios</mat-icon>
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="main-value">
+          <span class="number">156</span>
+          <span class="trend up" matTooltip="Mejora constante">
+            <mat-icon>trending_up</mat-icon> +4%
+          </span>
+        </div>
+        <p class="subtext">Dentro de rangos glucémicos esperados</p>
+        <div class="mini-chart-bg">
+          <div class="bar-decorator green" style="height: 40%"></div>
+          <div class="bar-decorator green" style="height: 60%"></div>
+          <div class="bar-decorator green highlight" style="height: 90%"></div>
+          <div class="bar-decorator green" style="height: 70%"></div>
+        </div>
+      </div>
+    </mat-card>
+
+    <!-- Sin Registros -->
+    <mat-card class="kpi-card-v2 no-records-solid custom-elevation">
+      <div class="card-header">
+        <div class="card-title-group">
+          <mat-icon class="text-white">pending_actions</mat-icon>
+          <span class="card-title text-white">Sin Registros Hoy</span>
+        </div>
+        <button mat-icon-button matTooltip="Enviar recordatorios" class="action-btn text-white">
+          <mat-icon>notifications_active</mat-icon>
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="main-value">
+          <span class="number text-white">12</span>
+          <span class="trend down solid" matTooltip="Ligero descenso vs ayer">
+            <mat-icon>trending_down</mat-icon> -2%
+          </span>
+        </div>
+        <p class="subtext text-white-50">Tasa de lectura diaria: 92%</p>
+        <div class="progress-bar-container solid-bg">
+            <div class="progress-fill white-fill" style="width: 92%">92% completado</div>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+
+  <div class="main-content-grid">
+    
+    <!-- Alertas -->
+    <div class="alerts-section stagger-3">
+      <div class="section-header">
+        <h3 class="section-title">Alertas Recientes</h3>
+        <button mat-button color="primary">Ver Todas</button>
+      </div>
+      
+      <mat-card class="content-card custom-elevation list-card">
+        <div class="custom-alert-list">
+          <div *ngFor="let alerta of alertas; let last = last" class="custom-alert-item" [class.border-bottom]="!last">
+            
+            <div class="status-icon-wrapper" [ngClass]="alerta.severidad">
+              <mat-icon *ngIf="alerta.severidad === 'rojo'">error_outline</mat-icon>
+              <mat-icon *ngIf="alerta.severidad === 'naranja'">warning</mat-icon>
+              <mat-icon *ngIf="alerta.severidad === 'verde'">check_circle_outline</mat-icon>
+            </div>
+            
+            <div class="alert-text-group">
+              <div class="alert-title">
+                <strong>{{alerta.paciente}}</strong>
+                <span class="badge" [ngClass]="alerta.severidad">{{alerta.tipo}}</span>
+              </div>
+              <div class="alert-meta">
+                <span class="alert-value"><strong>{{alerta.valor}} mg/dL</strong></span>
+                <span class="dot-separator">•</span>
+                <span class="alert-time">{{alerta.tiempo}}</span>
+              </div>
+            </div>
+            
+            <div class="alert-actions">
+              <button mat-stroked-button color="accent" class="contact-btn">
+                <mat-icon>phone</mat-icon> Llamar
+              </button>
+              <button mat-icon-button [matMenuTriggerFor]="menu" matTooltip="Más opciones">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu" class="custom-menu">
+                <button mat-menu-item><mat-icon>visibility</mat-icon><span>Ficha clínica</span></button>
+                <button mat-menu-item><mat-icon>history</mat-icon><span>Historial de medidas</span></button>
+                <mat-divider></mat-divider>
+                <button mat-menu-item><mat-icon>done</mat-icon><span>Marcar como revisado</span></button>
+              </mat-menu>
+            </div>
+
+          </div>
+          
+          <div *ngIf="alertas.length === 0" class="empty-state">
+            <mat-icon>check_circle_outline</mat-icon>
+            <p>No hay alertas en este momento.</p>
+          </div>
+        </div>
+      </mat-card>
+    </div>
+
+    <!-- Columna Secundaria -->
+    <div class="secondary-column stagger-4">
+      
+      <div class="section-header">
+        <h3 class="section-title">Adherencia Semanal</h3>
+      </div>
+      <mat-card class="content-card chart-card custom-elevation mb-24">
+        <div class="chart-placeholder animated-bg">
+          <mat-icon>show_chart</mat-icon>
+          <h4>Tendencia de Glucosa</h4>
+          <p>Métricas promedio de los últimos 7 días</p>
+          <button mat-button color="primary">Generar Gráfico Completo</button>
+        </div>
+      </mat-card>
+
+      <div class="section-header">
+        <h3 class="section-title">Pacientes en Riesgo</h3>
+        <mat-icon class="info-icon" matTooltip="Basado en los últimos 7 días de registros">info</mat-icon>
+      </div>
+      
+      <mat-card class="content-card ranking-card custom-elevation">
+        <table mat-table [dataSource]="rankingPacientes" class="full-width-table modern-table">
+          
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef>Paciente</th>
+            <td mat-cell *matCellDef="let p">
+              <div class="patient-cell">
+                <div class="avatar-placeholder">{{p.nombre.charAt(0)}}</div>
+                <span class="patient-name">{{p.nombre}}</span>
+              </div>
+            </td>
+          </ng-container>
+          
+          <ng-container matColumnDef="alertas">
+            <th mat-header-cell *matHeaderCellDef class="text-right">Incidentes</th>
+            <td mat-cell *matCellDef="let p" class="text-right">
+              <div class="incidents-cell">
+                <span class="badge-count">{{p.cantidad}}</span>
+                <mat-icon *ngIf="p.tendencia === 'sube'" class="trend-icon text-red">arrow_drop_up</mat-icon>
+                <mat-icon *ngIf="p.tendencia === 'baja'" class="trend-icon text-green">arrow_drop_down</mat-icon>
+                <mat-icon *ngIf="p.tendencia === 'estable'" class="trend-icon text-gray">remove</mat-icon>
+              </div>
+            </td>
+          </ng-container>
+          
+          <tr mat-header-row *matHeaderRowDef="['nombre', 'alertas']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['nombre', 'alertas'];" class="table-row-hover"></tr>
+        </table>
+      </mat-card>
+    </div>
+
+  </div>
+</div>
