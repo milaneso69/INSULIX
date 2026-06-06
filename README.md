@@ -39,11 +39,10 @@ El proyecto está dividido en un ecosistema moderno enfocado en el rendimiento y
 
 ## 📸 Interfaz de la Aplicación
 
-> *(Nota: Agrega aquí 2 o 3 capturas de pantalla de la aplicación funcionando. Reemplaza las rutas)*
 
 |<img src="ruta/a/tu/captura1.png" width="250">|<img src="ruta/a/tu/captura2.png" width="250">|<img src="ruta/a/tu/captura3.png" width="250">|
 |:---:|:---:|:---:|
-| *Dashboard Principal* | *Predicción de Glucosa* | *Reportes Médicos* |
+| *Dashboard Principal* | *App Movil* |
 
 ---
 
